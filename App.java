@@ -1,52 +1,90 @@
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Image;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.util.Random;
+import java.awt.AlphaComposite;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-public class App {
-    static String[] strs = {"a","b","c","d","e","f","g","h","i","j","k","M","N","P","Q","R","S","T","U","V","W","X","Y","Z",
-    "2","3","4","5","6","7","8","9"};
-    private static void createImage(){
-        int width = 150;
-        int height = 50;
-        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-        Graphics g = image.getGraphics();
-        g.fillRect(0, 0, width, height);
-        g.setColor(Color.BLACK);
-        g.setFont(new Font("Helvetica",Font.BOLD,25));
-        Random random = new Random();
-        int x = 30;
-        int y = 30;
-        for (int i = 0; i < 4; i++) {
-            int num = random.nextInt(strs.length);
-            String s = strs[num];
-            g.drawString(s, x, y);
-            x+=25;
-        }
-        for (int i = 0; i < 10; i++) {
-            int x1 = random.nextInt(25);
-            int y1 = random.nextInt(45);
-            int x2 = random.nextInt(25)+125;
-            int y2 = random.nextInt(45);
-            g.setColor(Color.LIGHT_GRAY);
-            g.drawLine(x1, y1, x2, y2);
-        }
+public class App extends JPanel{
+    static BufferedImage img;
+    static float ff;
+
+    public static void main(String[] args) {
+        // 画框
+        JFrame frame = new JFrame();
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setTitle("Album");
+        frame.setLocationRelativeTo(null);
+        frame.setSize(800,500);
+        //初始化数据
+        initImages();
+        // 画板
+        App app = new App();
+        frame.add(app);
+        // 重绘
+        // app.repaint();
+
+        app.begin();
+
+        frame.setVisible(true);
+    }
+
+    static int num = 0;
+
+    private void begin() {
+        new Thread(new Runnable() {
+            public void run(){
+                while(true){
+                    img = images[num];
+                    num++;
+                    if(num == 5){
+                        num = 0;
+                    }
+                    repaint();
+                    // while(true){
+                    //     if (ff < 100f) {
+                    //         ff += 2f;
+                    //         repaint();
+                    //     } else {
+                    //         ff = 0f;
+                    //         break;
+                    //     }
+                    // }
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }).start();
+    }
+
+    public void paint(Graphics g){
+      super.paint(g);
+      Graphics2D graphics2D = (Graphics2D) g;
+      if(img != null){
+        // graphics2D.setComposite(AlphaComposite.SrcOver.derive(ff/100f));
+        graphics2D.drawImage(img, 0, 0, img.getWidth(),img.getHeight(), null);
+      }
+    }
+
+    static BufferedImage [] images = new BufferedImage[5];
+
+    private static void initImages() {
         try {
-          ImageIO.write(image, "jpg", new File("/Users/may/Downloads/code.jpg"));
+            for (int i = 1; i <= 5; i++) {
+                BufferedImage image = ImageIO.read(App.class.getResource("/images/bg" + i + ".jpg"));
+                images[i-1]=image;
+                img = images[0];
+            }
         } catch (Exception e) {
             //TODO: handle exception
         }
+        
     }
-    public static void main(String[] args) {
-        createImage();
-        System.out.print("over");
-        return;
-    }
+    
 }
